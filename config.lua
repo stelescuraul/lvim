@@ -1,6 +1,6 @@
-local node_bin = '/home/raul/.nvm/versions/node/v16.18.1/bin'
-vim.g.node_host_prog = node_bin .. '/node'
-vim.cmd("let $PATH = '" .. node_bin .. ":' . $PATH")
+-- local node_bin = '/home/raul/.nvm/versions/node/v16.18.1/bin'
+-- vim.g.node_host_prog = node_bin .. '/node'
+-- vim.cmd("let $PATH = '" .. node_bin .. ":' . $PATH")
 
 vim.opt.updatetime = 50
 vim.opt.timeoutlen = 150
@@ -40,6 +40,9 @@ vim.cmd("command! LspOrganize lua lsp_organize_imports_sync()")
 
 lvim.builtin.which_key.mappings["lo"] = {
   "<cmd>LspOrganize <cr>", "Organize Imports"
+}
+lvim.builtin.which_key.mappings["lf"] = {
+  ":lua vim.lsp.buf.format() <cr>", "Format"
 }
 
 -- Add a terminal
@@ -215,12 +218,6 @@ formatters.setup {
 -- -- set additional linters
 local linters = require "lvim.lsp.null-ls.linters"
 linters.setup {
-  {
-    command = "eslint_d",
-    filetypes = { "typescript", "typescriptreact", "javascript", "javascriptreact" }
-    ---@usage specify which filetypes to enable. By default a providers will attach to all the filetypes it supports.
-  },
-  --
   -- {
   --   command = "eslint_d",
   --   filetypes = { "typescript", "typescriptreact", "javascript", "javascriptreact" }
