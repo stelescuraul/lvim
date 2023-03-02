@@ -34,7 +34,7 @@ _G.lsp_organize_imports_sync = function(bufnr)
 
   -- perform a syncronous request
   -- 500ms timeout depending on the size of file a bigger timeout may be needed
-  vim.lsp.buf_request_sync(bufnr, "workspace/executeCommand", params, 1000)
+  vim.lsp.buf_request(bufnr, "workspace/executeCommand", params)
 end
 vim.cmd("command! LspOrganize lua lsp_organize_imports_sync()")
 
@@ -90,7 +90,7 @@ lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 
 -- Change Telescope navigation to use j and k for navigation and n and p for history in both input and normal mode.
 -- we use protected-mode (pcall) just in case the plugin wasn't loaded yet.
--- local _, actions = pcall(require, "telescope.actions")
+-- local _, actions = pcall(require, "telescope.actions") 
 -- local trouble = pcall(require ,'trouble')
 
 lvim.builtin.telescope.defaults.mappings = {
@@ -131,6 +131,17 @@ lvim.builtin.alpha.mode = "dashboard"
 lvim.builtin.terminal.active = true
 lvim.builtin.nvimtree.setup.view.side = "left"
 lvim.builtin.nvimtree.setup.renderer.icons.show.git = false
+lvim.builtin.nvimtree.setup.update_cwd = false
+lvim.builtin.nvimtree.setup.sync_root_with_cwd = false
+lvim.builtin.nvimtree.setup.respect_buf_cwd = false
+lvim.builtin.nvimtree.setup.update_focused_file.update_root = false
+lvim.builtin.nvimtree.setup.update_focused_file.enable = false
+lvim.builtin.nvimtree.setup.update_focused_file.update_cwd = false
+
+
+lvim.builtin.project.manual_mode = true
+lvim.builtin.project.show_hidden = true
+lvim.builtin.project.silent_chdir = false
 
 -- if you don't want all the parsers change this to a table of the ones you want
 lvim.builtin.treesitter.ensure_installed = {
@@ -172,9 +183,11 @@ lvim.builtin.treesitter.highlight.enable = true
 
 -- ---configure a server manually. !!Requires `:LvimCacheReset` to take effect!!
 -- ---see the full default list `:lua print(vim.inspect(lvim.lsp.automatic_configuration.skipped_servers))`
--- vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "pyright" })
--- local opts = {} -- check the lspconfig documentation for a list of all possible options
--- require("lvim.lsp.manager").setup("pyright", opts)
+
+-- vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "tsserver" })
+-- local opts = {
+--   root_dir = require("lspconfig").util.root_pattern(".git") } -- check the lspconfig documentation for a list of all possible options
+-- require("lvim.lsp.manager").setup("tsserver", opts)
 
 -- require 'lspconfig'.tsserver.setup {}
 
@@ -256,7 +269,13 @@ lvim.plugins = {
   },
   {
     'rose-pine/neovim'
-  }
+  },
+  { "mxsdev/nvim-dap-vscode-js", requires = { "mfussenegger/nvim-dap" } },
+  -- {
+  --   "microsoft/vscode-js-debug",
+  --   opt = true,
+  --   run = "npm install --legacy-peer-deps && npm run compile"
+  -- }
 }
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
@@ -288,16 +307,82 @@ lvim.builtin.which_key.mappings["a"] = {
 }
 
 
--- local dap = require('dap')
--- local dap_vscode = require('dap-vscode-js')
--- dap_vscode.setup({
---   adapterss = { 'pwa-node' }
--- })
+-- dap.adapters.node2 = {
+--   type = 'executable',
+--   command = 'node',
+--   args = { os.getenv('HOME') .. '/.local/share/nvim/mason/packages/node-debug2-adapter/out/src/nodeDebug.js' },
+-- }
+
+local dap_vscode = require('dap-vscode-js')
+local dap = require('dap')
+local dap_utils = require('dap.utils')
+
+dap_vscode.setup({
+  -- debugger_path = "(runtimedir)/site/pack/packer/opt/vscode-js-debug", -- Path to vscode-js-debug installation.
+  -- debugger_path = os.getenv('HOME') .. '/.local/share/lunarvim/site/pack/packer/opt/vscode-js-debug',
+  debugger_path = os.getenv('HOME') .. '/.local/share/nvim/mason/packages/js-debug-adapter',
+  -- debugger_cmd = { "js-debug-adapter" }, -- Command to use to launch the debug server. Takes precedence over `node_path` and `debugger_path`.
+  adapters = { 'pwa-node', -- 'node-terminal', 'pwa-extensionHost'
+  }, -- which adapters to register in nvim-dap
+  -- log_file_path = "(stdpath cache)/dap_vscode_js.log", -- Path for file logging
+  -- log_file_level = false -- Logging level for output to file. Set to false to disable file logging.
+  -- log_console_level = vim.log.levels.DEBUG -- Logging level for output to console. Set to false to disable console output.
+})
+
+for _, language in ipairs({ "typescript", "javascript" }) do
+  dap.configurations[language] = {
+    {
+      type = "pwa-node",
+      request = "attach",
+      name = "Attach",
+      processId = dap_utils.pick_process,
+      -- cwd = "${workspaceFolder}",
+      cwd = "/home/raul/work/backend-services/",
+      sourceMaps = true,
+      skipFiles = { '<node_internals>/**', 'node_modules/**', '**/node_modules/**' },
+    }
+  }
+end
 
 -- dap.configurations.typescript = {
---   {
---     type = 'typescript';
---     request = 'attach';
---     name = "Attach to process";
+-- {
+--   type = 'node2',
+--   request = 'attach',
+--   name = "Attach to process",
+--   processId = require 'dap.utils'.pick_process,
+--   sourceMaps = true,
+--   -- cwd = vim.fn.getcwd(),
+--   -- cwd = os.getenv('HOME') .. '/work/backend-services/dist/services/core',
+--   -- cwd = "${workspaceFolder}",
+--   -- protocol = "inspector",
+--   -- console = "integratedTerminal",
+--   skipFiles = { '<node_internals>/**', 'node_modules/**', 'node_modules/**' },
+--   resolveSourceMapLocations = {
+--     "${workspaceFolder}/**",
+--     "!**/node_modules/**",
+--     "**/${workspaceFolder}/**"
 --   },
+-- },
+-- {
+--   type = 'chrome',
+--   request = 'attach',
+--   name = "Attach to process",
+--   processId = require 'dap.utils'.pick_process,
+--   program = '${file}',
+--   sourceMaps = true,
+--   cwd = "${workspaceFolder}",
+--   protocol = "inspector",
+--   -- console = "integratedTerminal",
+-- }
+
+-- {
+--   type = 'node2',
+--   name = 'Attach',
+--   request = 'attach',
+--   program = '${file}',
+--   cwd = vim.fn.getcwd(),
+--   sourceMaps = true,
+--   -- protocol = 'inspector',
+--   -- console = 'integratedTerminal',
+-- },
 -- }
