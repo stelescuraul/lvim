@@ -1,6 +1,6 @@
-local node_bin = '/home/raul/.nvm/versions/node/v16.18.1/bin'
-vim.g.node_host_prog = node_bin .. '/node'
-vim.cmd("let $PATH = '" .. node_bin .. ":' . $PATH")
+-- local node_bin = '/home/raul/.nvm/versions/node/v16.18.1/bin'
+-- vim.g.node_host_prog = node_bin .. '/node'
+-- vim.cmd("let $PATH = '" .. node_bin .. ":' . $PATH")
 
 vim.opt.updatetime = 50
 vim.opt.timeoutlen = 150
@@ -15,11 +15,11 @@ vim.opt.termguicolors = true
 
 vim.opt.scrolloff = 8
 
-vim.keymap.set("n", "J", "mzJ`z") -- Join lines but keep the cursor in place
+vim.keymap.set("n", "J", "mzJ`z")       -- Join lines but keep the cursor in place
 vim.keymap.set("n", "<C-d>", "<C-d>zz") -- keep cursor in middle when going down
 vim.keymap.set("n", "<C-u>", "<C-u>zz") -- keep cursor in middle when going down
-vim.keymap.set("n", "n", "nzzzv") -- keep cursor in middle when searching
-vim.keymap.set("n", "N", "Nzzzv") -- keep cursor in middle when searching
+vim.keymap.set("n", "n", "nzzzv")       -- keep cursor in middle when searching
+vim.keymap.set("n", "N", "Nzzzv")       -- keep cursor in middle when searching
 
 _G.lsp_organize_imports_sync = function(bufnr)
   -- gets the current bufnr if no bufnr is passed
@@ -143,6 +143,8 @@ lvim.builtin.treesitter.ensure_installed = {
   "rust",
   "java",
   "yaml",
+  "go",
+  "gomod"
 }
 
 lvim.builtin.treesitter.ignore_install = { "haskell" }
@@ -204,6 +206,8 @@ formatters.setup {
     ---@usage specify which filetypes to enable. By default a providers will attach to all the filetypes it supports.
     filetypes = { "typescript", "typescriptreact", "json" },
   },
+  { command = "goimports", filetypes = { "go" } },
+  { command = "gofumpt",   filetypes = { "go" } },
   -- {
   --   -- each formatter accepts a list of options identical to https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#Configuration
   --   command = "eslint",
@@ -259,7 +263,9 @@ lvim.plugins = {
   },
   {
     'rose-pine/neovim'
-  }
+  },
+  "olexsmir/gopher.nvim",
+  "leoluz/nvim-dap-go",
 }
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
@@ -290,6 +296,19 @@ lvim.builtin.which_key.mappings["a"] = {
   r = { function() ui.nav_file(4) end, "Buffer 4" }
 }
 
+vim.g.clipboard = {
+  name = 'WslClipboard',
+  copy = {
+    ["+"] = 'clip.exe',
+    ["*"] = 'clip.exe',
+  },
+  paste = {
+    ["+"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+    ["*"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+  },
+  cache_enabled = 0,
+}
+vim.opt.clipboard = ""
 
 -- local dap = require('dap')
 -- local dap_vscode = require('dap-vscode-js')
@@ -301,6 +320,9 @@ lvim.builtin.which_key.mappings["a"] = {
 --   {
 --     type = 'typescript';
 --     request = 'attach';
+--     name = "Attach to process";
+--   },
+-- }
 --     name = "Attach to process";
 --   },
 -- }
