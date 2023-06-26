@@ -177,6 +177,8 @@ lvim.builtin.treesitter.ensure_installed = {
   "java",
   "yaml",
   "markdown"
+  "go",
+  "gomod"
 }
 
 lvim.builtin.treesitter.ignore_install = { "haskell" }
@@ -247,6 +249,8 @@ formatters.setup {
     ---@usage specify which filetypes to enable. By default a providers will attach to all the filetypes it supports.
     filetypes = { "typescript", "typescriptreact", "json" },
   },
+  { command = "goimports", filetypes = { "go" } },
+  { command = "gofumpt",   filetypes = { "go" } },
   -- {
   --   -- each formatter accepts a list of options identical to https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#Configuration
   --   command = "eslint",
@@ -303,7 +307,8 @@ lvim.plugins = {
   {
     "iamcco/markdown-preview.nvim",
     run = function() vim.fn["mkdp#util#install"]() end,
-  }
+  },
+  "olexsmir/gopher.nvim",
 }
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
@@ -365,3 +370,17 @@ end
 vim.g.copilot_no_tab_map = true
 vim.g.copilot_assume_mapped = true
 vim.api.nvim_set_keymap("i", "<M-l>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
+
+vim.g.clipboard = {
+  name = 'WslClipboard',
+  copy = {
+    ["+"] = 'clip.exe',
+    ["*"] = 'clip.exe',
+  },
+  paste = {
+    ["+"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+    ["*"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+  },
+  cache_enabled = 0,
+}
+vim.opt.clipboard = ""
