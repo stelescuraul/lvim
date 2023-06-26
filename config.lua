@@ -176,7 +176,7 @@ lvim.builtin.treesitter.ensure_installed = {
   "rust",
   "java",
   "yaml",
-  "markdown"
+  "markdown",
   "go",
   "gomod"
 }
