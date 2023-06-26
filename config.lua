@@ -15,11 +15,11 @@ vim.opt.termguicolors = true
 
 vim.opt.scrolloff = 8
 
-vim.keymap.set("n", "J", "mzJ`z") -- Join lines but keep the cursor in place
+vim.keymap.set("n", "J", "mzJ`z")       -- Join lines but keep the cursor in place
 vim.keymap.set("n", "<C-d>", "<C-d>zz") -- keep cursor in middle when going down
 vim.keymap.set("n", "<C-u>", "<C-u>zz") -- keep cursor in middle when going down
-vim.keymap.set("n", "n", "nzzzv") -- keep cursor in middle when searching
-vim.keymap.set("n", "N", "Nzzzv") -- keep cursor in middle when searching
+vim.keymap.set("n", "n", "nzzzv")       -- keep cursor in middle when searching
+vim.keymap.set("n", "N", "Nzzzv")       -- keep cursor in middle when searching
 
 _G.lsp_organize_imports_sync = function(bufnr)
   -- gets the current bufnr if no bufnr is passed
@@ -68,6 +68,9 @@ lvim.log.level = "warn"
 lvim.format_on_save.enabled = false
 lvim.colorscheme = "rose-pine"
 
+lvim.builtin.autopairs.disable_in_macro = true
+lvim.builtin.autopairs.enable_afterquote = false
+
 lvim.builtin.nvimtree.setup.disable_netrw = false
 lvim.builtin.cmp.experimental.ghost_text = false
 lvim.builtin.treesitter.highlight.enable = true
@@ -90,7 +93,7 @@ lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 
 -- Change Telescope navigation to use j and k for navigation and n and p for history in both input and normal mode.
 -- we use protected-mode (pcall) just in case the plugin wasn't loaded yet.
--- local _, actions = pcall(require, "telescope.actions") 
+-- local _, actions = pcall(require, "telescope.actions")
 -- local trouble = pcall(require ,'trouble')
 
 lvim.builtin.telescope.defaults.mappings = {
@@ -106,14 +109,27 @@ lvim.builtin.telescope.defaults.mappings = {
     ["<C-k>"] = "move_selection_previous"
   },
 }
+lvim.builtin.which_key.mappings["P"] = lvim.builtin.which_key.mappings["p"]
+lvim.builtin.which_key.mappings["bN"] = { "<cmd>enew<cr>", "New Buffer" }
 
 -- Change theme settings
 -- lvim.builtin.theme.options.dim_inactive = true
 -- lvim.builtin.theme.options.style = "storm"
 
 -- Use which-key to add extra bindings with the leader-key prefix
-lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
-lvim.builtin.which_key.mappings["T"] = { "<cmd>Telescope <CR>", "Telescope" }
+-- lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
+lvim.builtin.which_key.mappings["p"] = {
+  name = "+Project",
+  t = { "<cmd>Telescope <CR>", "Telescope" },
+  f = {
+    function()
+      require("lvim.core.telescope.custom-finders").find_project_files { previewer = false }
+    end,
+    "Find File",
+  }
+  -- a = { "<cmd>AerialToggle <CR>", "Aerial" }
+}
+lvim.builtin.which_key.mappings["ba"] = { "<cmd>AerialToggle <CR>", "Aerial" }
 lvim.builtin.which_key.mappings["t"] = {
   name = "+Trouble",
   r = { "<cmd>Trouble lsp_references<cr>", "References" },
@@ -130,18 +146,21 @@ lvim.builtin.alpha.active = true
 lvim.builtin.alpha.mode = "dashboard"
 lvim.builtin.terminal.active = true
 lvim.builtin.nvimtree.setup.view.side = "left"
-lvim.builtin.nvimtree.setup.renderer.icons.show.git = false
-lvim.builtin.nvimtree.setup.update_cwd = false
-lvim.builtin.nvimtree.setup.sync_root_with_cwd = false
-lvim.builtin.nvimtree.setup.respect_buf_cwd = false
-lvim.builtin.nvimtree.setup.update_focused_file.update_root = false
-lvim.builtin.nvimtree.setup.update_focused_file.enable = false
-lvim.builtin.nvimtree.setup.update_focused_file.update_cwd = false
+lvim.builtin.nvimtree.setup.renderer.icons.show.git = true
+-- lvim.builtin.nvimtree.setup.update_cwd = false
+-- lvim.builtin.nvimtree.setup.sync_root_with_cwd = false
+-- lvim.builtin.nvimtree.setup.respect_buf_cwd = false
+-- lvim.builtin.nvimtree.setup.update_focused_file.update_root = false
+-- lvim.builtin.nvimtree.setup.update_focused_file.enable = false
+-- lvim.builtin.nvimtree.setup.update_focused_file.update_cwd = false
 
+-- lvim.builtin.project.detection_methods = { "pattern" }
+-- lvim.builtin.project.patterns = { ".git" }
 
-lvim.builtin.project.manual_mode = true
-lvim.builtin.project.show_hidden = true
-lvim.builtin.project.silent_chdir = false
+-- lvim.builtin.project.manual_mode = false
+-- lvim.builtin.project.show_hidden = true
+
+lvim.builtin.project.active = false
 
 -- if you don't want all the parsers change this to a table of the ones you want
 lvim.builtin.treesitter.ensure_installed = {
@@ -157,6 +176,7 @@ lvim.builtin.treesitter.ensure_installed = {
   "rust",
   "java",
   "yaml",
+  "markdown"
 }
 
 lvim.builtin.treesitter.ignore_install = { "haskell" }
@@ -206,6 +226,13 @@ lvim.builtin.treesitter.highlight.enable = true
 --   --Enable completion triggered by <c-x><c-o>
 --   buf_set_option("omnifunc", "v:lua.vim.lsp.omnifunc")
 -- end
+
+-- local null_ls = require 'lvim.lsp.null-ls';
+-- local null_ls_utils = require 'lvim.lsp.null-ls.utils';
+
+-- null_ls.setup({
+--   root_dir = null_ls_utils.root_pattern(".null-ls-root", ".git", "")
+-- })
 
 -- -- set a formatter, this will override the language server formatting capabilities (if it exists)
 local formatters = require "lvim.lsp.null-ls.formatters"
@@ -270,12 +297,13 @@ lvim.plugins = {
   {
     'rose-pine/neovim'
   },
-  { "mxsdev/nvim-dap-vscode-js", requires = { "mfussenegger/nvim-dap" } },
-  -- {
-  --   "microsoft/vscode-js-debug",
-  --   opt = true,
-  --   run = "npm install --legacy-peer-deps && npm run compile"
-  -- }
+  { "mxsdev/nvim-dap-vscode-js",              requires = { "mfussenegger/nvim-dap" } },
+  { 'nvim-treesitter/nvim-treesitter-context' },
+  { "github/copilot.vim" },
+  {
+    "iamcco/markdown-preview.nvim",
+    run = function() vim.fn["mkdp#util#install"]() end,
+  }
 }
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
@@ -306,24 +334,14 @@ lvim.builtin.which_key.mappings["a"] = {
   r = { function() ui.nav_file(4) end, "Buffer 4" }
 }
 
-
--- dap.adapters.node2 = {
---   type = 'executable',
---   command = 'node',
---   args = { os.getenv('HOME') .. '/.local/share/nvim/mason/packages/node-debug2-adapter/out/src/nodeDebug.js' },
--- }
-
 local dap_vscode = require('dap-vscode-js')
 local dap = require('dap')
 local dap_utils = require('dap.utils')
 
 dap_vscode.setup({
-  -- debugger_path = "(runtimedir)/site/pack/packer/opt/vscode-js-debug", -- Path to vscode-js-debug installation.
-  -- debugger_path = os.getenv('HOME') .. '/.local/share/lunarvim/site/pack/packer/opt/vscode-js-debug',
   debugger_path = os.getenv('HOME') .. '/.local/share/nvim/mason/packages/js-debug-adapter',
-  -- debugger_cmd = { "js-debug-adapter" }, -- Command to use to launch the debug server. Takes precedence over `node_path` and `debugger_path`.
   adapters = { 'pwa-node', -- 'node-terminal', 'pwa-extensionHost'
-  }, -- which adapters to register in nvim-dap
+  },                       -- which adapters to register in nvim-dap
   -- log_file_path = "(stdpath cache)/dap_vscode_js.log", -- Path for file logging
   -- log_file_level = false -- Logging level for output to file. Set to false to disable file logging.
   -- log_console_level = vim.log.levels.DEBUG -- Logging level for output to console. Set to false to disable console output.
@@ -336,53 +354,14 @@ for _, language in ipairs({ "typescript", "javascript" }) do
       request = "attach",
       name = "Attach",
       processId = dap_utils.pick_process,
-      -- cwd = "${workspaceFolder}",
-      cwd = "/home/raul/work/backend-services/",
+      cwd = "${workspaceFolder}",
       sourceMaps = true,
-      skipFiles = { '<node_internals>/**', 'node_modules/**', '**/node_modules/**' },
+      skipFiles = { '<node_internals>/**', 'node_modules/**' },
     }
   }
 end
 
--- dap.configurations.typescript = {
--- {
---   type = 'node2',
---   request = 'attach',
---   name = "Attach to process",
---   processId = require 'dap.utils'.pick_process,
---   sourceMaps = true,
---   -- cwd = vim.fn.getcwd(),
---   -- cwd = os.getenv('HOME') .. '/work/backend-services/dist/services/core',
---   -- cwd = "${workspaceFolder}",
---   -- protocol = "inspector",
---   -- console = "integratedTerminal",
---   skipFiles = { '<node_internals>/**', 'node_modules/**', 'node_modules/**' },
---   resolveSourceMapLocations = {
---     "${workspaceFolder}/**",
---     "!**/node_modules/**",
---     "**/${workspaceFolder}/**"
---   },
--- },
--- {
---   type = 'chrome',
---   request = 'attach',
---   name = "Attach to process",
---   processId = require 'dap.utils'.pick_process,
---   program = '${file}',
---   sourceMaps = true,
---   cwd = "${workspaceFolder}",
---   protocol = "inspector",
---   -- console = "integratedTerminal",
--- }
-
--- {
---   type = 'node2',
---   name = 'Attach',
---   request = 'attach',
---   program = '${file}',
---   cwd = vim.fn.getcwd(),
---   sourceMaps = true,
---   -- protocol = 'inspector',
---   -- console = 'integratedTerminal',
--- },
--- }
+-- copilot
+vim.g.copilot_no_tab_map = true
+vim.g.copilot_assume_mapped = true
+vim.api.nvim_set_keymap("i", "<M-l>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
