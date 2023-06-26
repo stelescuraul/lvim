@@ -371,16 +371,16 @@ vim.g.copilot_no_tab_map = true
 vim.g.copilot_assume_mapped = true
 vim.api.nvim_set_keymap("i", "<M-l>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
 
-vim.g.clipboard = {
-  name = 'WslClipboard',
-  copy = {
-    ["+"] = 'clip.exe',
-    ["*"] = 'clip.exe',
-  },
-  paste = {
-    ["+"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
-    ["*"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
-  },
-  cache_enabled = 0,
-}
-vim.opt.clipboard = ""
+-- vim.g.clipboard = {
+--   name = 'WslClipboard',
+--   copy = {
+--     ["+"] = 'clip.exe',
+--     ["*"] = 'clip.exe',
+--   },
+--   paste = {
+--     ["+"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+--     ["*"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+--   },
+--   cache_enabled = 0,
+-- }
+-- vim.opt.clipboard = ""
