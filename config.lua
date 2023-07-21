@@ -45,6 +45,52 @@ lvim.builtin.which_key.mappings["lf"] = {
   ":lua vim.lsp.buf.format() <cr>", "Format"
 }
 
+lvim.builtin.telescope.defaults.path_display = nil
+lvim.builtin.telescope.defaults.layout_config = {
+  -- prompt_position = "top",
+  height = 0.7,
+  width = 0.7,
+  bottom_pane = {
+    height = 25,
+    preview_cutoff = 120,
+  },
+  center = {
+    height = 0.4,
+    preview_cutoff = 40,
+    width = 0.5,
+  },
+  cursor = {
+    preview_cutoff = 40,
+  },
+  horizontal = {
+    preview_cutoff = 120,
+    preview_width = 0.6,
+  },
+  vertical = {
+    preview_cutoff = 40,
+  },
+  flex = {
+    flip_columns = 150,
+  },
+}
+
+local telescope_keys = {
+  ["find_files"] = true,
+  ["git_files"] = true,
+  ["grep_string"] = true,
+  ["live_grep"] = true,
+}
+
+for key, _ in pairs(lvim.builtin.telescope.pickers) do
+  if telescope_keys[key] == true then
+    lvim.builtin.telescope.pickers[key].previewer = nil
+    lvim.builtin.telescope.pickers[key].theme = nil
+    lvim.builtin.telescope.pickers[key].layout_strategy = nil
+  end
+end
+
+lvim.builtin.telescope.defaults.layout_strategy = "flex"
+
 -- Add a terminal
 -- lvim.builtin.which_key.mappings["nt"] = {
 --   "<cmd>terminal <cr>", "Terminal"
@@ -123,7 +169,7 @@ lvim.builtin.which_key.mappings["p"] = {
   t = { "<cmd>Telescope <CR>", "Telescope" },
   f = {
     function()
-      require("lvim.core.telescope.custom-finders").find_project_files { previewer = false }
+      require("lvim.core.telescope.custom-finders").find_project_files {}
     end,
     "Find File",
   }
@@ -309,6 +355,7 @@ lvim.plugins = {
     run = function() vim.fn["mkdp#util#install"]() end,
   },
   "olexsmir/gopher.nvim",
+  { 'stevearc/dressing.nvim' }
 }
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
